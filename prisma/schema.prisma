@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite keeps local development dependency-free.
+// For production, switch the provider to "postgresql" and point DATABASE_URL at your database.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique // E.164, e.g. +15551234567
+  name      String
+  company   String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  status          String      @default("pending") // pending | paid | canceled
+  totalCents      Int
+  currency        String      @default("usd")
+  stripeSessionId String?     @unique
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id             String @id @default(cuid())
+  orderId        String
+  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  name           String
+  unitPriceCents Int
+  quantity       Int
+}
