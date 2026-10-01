@@ -10,18 +10,28 @@ A Next.js (App Router) + React website for a manufacturing company with:
 
 ## Quick start
 
-You need Node.js 20+ and a Postgres database. The easiest local option is Docker:
+You need Node.js 20+ and a Postgres database. The easiest local option is [Podman](https://podman.io/docs/installation):
 
 ```bash
 npm install
-docker compose up -d         # starts Postgres on localhost:5432
+podman compose up -d         # starts Postgres on localhost:5432
 cp .env.example .env.local   # Next.js reads this
 cp .env.example .env         # Prisma CLI reads this (only DATABASE_URL is needed)
 npm run db:migrate           # creates the tables
 npm run dev
 ```
 
-Without Docker, install Postgres yourself (or use a free hosted one such as Neon or Supabase), create a database,
+`podman compose` needs `podman-compose` or `docker-compose` installed as its provider (`pip install podman-compose`).
+On macOS and Windows, run `podman machine init && podman machine start` once first. Without compose, this does the same:
+
+```bash
+podman volume create pgdata
+podman run -d --name screwcompany-db -p 5432:5432 \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=screwcompany \
+  -v pgdata:/var/lib/postgresql/data docker.io/library/postgres:16
+```
+
+Without Podman, install Postgres yourself (or use a free hosted one such as Neon or Supabase), create a database,
 and set `DATABASE_URL` in both `.env` and `.env.local` to its connection string.
 
 Open http://localhost:3000.
