@@ -1,4 +1,9 @@
-# Local Postgres for development: `podman compose up -d`
+# Local stack: Postgres, the API service and the website.
+#
+#   podman compose up -d db              # just the database (for `npm run dev`)
+#   podman compose up -d --build         # everything in containers
+#
+# Stripe/Twilio keys for the API container are read from a .env file next to this one (see .env.example).
 services:
   db:
     # Fully qualified image name so Podman doesn't prompt for a registry
@@ -13,6 +18,48 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d screwcompany"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Containerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/screwcompany
+      # "development" keeps cookies working over plain http://localhost and enables the 123456 SMS code.
+      # Use "production" (with HTTPS and a SESSION_SECRET) when deploying.
+      NODE_ENV: ${API_NODE_ENV:-development}
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_VERIFY_SERVICE_SID: ${TWILIO_VERIFY_SERVICE_SID:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Containerfile
+      args:
+        API_URL: http://api:4000
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_URL: http://api:4000
+    ports:
+      - "3000:3000"
 
 volumes:
   pgdata:
