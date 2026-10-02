@@ -2,10 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// SQLite keeps local development dependency-free.
-// For production, switch the provider to "postgresql" and point DATABASE_URL at your database.
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
