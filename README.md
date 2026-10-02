@@ -14,7 +14,7 @@ You need Node.js 20+ and a Postgres database. The easiest local option is [Podma
 
 ```bash
 npm install
-podman compose up -d         # starts Postgres on localhost:5432
+podman compose up -d         # starts Postgres on localhost:5433
 cp .env.example .env.local   # Next.js reads this
 cp .env.example .env         # Prisma CLI reads this (only DATABASE_URL is needed)
 npm run db:migrate           # creates the tables
@@ -26,10 +26,13 @@ On macOS and Windows, run `podman machine init && podman machine start` once fir
 
 ```bash
 podman volume create pgdata
-podman run -d --name screwcompany-db -p 5432:5432 \
+podman run -d --name screwcompany-db -p 5433:5432 \
   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=screwcompany \
   -v pgdata:/var/lib/postgresql/data docker.io/library/postgres:16
 ```
+
+The container listens on port **5433** rather than the usual 5432, so it can't collide with a Postgres installed
+directly on your computer (if one is running on 5432, migrations would silently go there instead).
 
 Without Podman, install Postgres yourself (or use a free hosted one such as Neon or Supabase), create a database,
 and set `DATABASE_URL` in both `.env` and `.env.local` to its connection string.

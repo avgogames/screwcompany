@@ -9,7 +9,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: screwcompany
     ports:
-      - "5432:5432"
+      # Host port 5433 avoids clashing with a Postgres installed directly on your computer
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
