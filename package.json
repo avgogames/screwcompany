@@ -1,37 +1,15 @@
 {
-  "name": "manufacturing-site",
-  "version": "0.1.0",
+  "name": "screwcompany",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "postinstall": "prisma generate",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "lint": "eslint",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.19.3",
-    "jose": "^6.2.12",
-    "libphonenumber-js": "^1.13.14",
-    "next": "16.3.8",
-    "prisma": "^6.19.3",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "server-only": "^0.0.1",
-    "stripe": "^23.0.0",
-    "twilio": "^6.1.2",
-    "zod": "^4.6.5"
+    "setup": "npm install && npm --prefix api install && npm --prefix web install",
+    "dev": "concurrently -n api,web -c blue,green \"npm --prefix api run dev\" \"npm --prefix web run dev\"",
+    "build": "npm --prefix api run build && npm --prefix web run build",
+    "lint": "npm --prefix web run lint",
+    "typecheck": "npm --prefix api run typecheck && npm --prefix web run typecheck",
+    "db:migrate": "npm --prefix api run db:migrate"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.8",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "concurrently": "^10.0.5"
   }
 }
